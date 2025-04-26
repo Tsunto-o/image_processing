@@ -1,20 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "bmp8.c"
 
 int main() {
-    FILE *fichier = fopen("test.txt", "r");
-    if (fichier == NULL) {
-        perror("Erreur d'ouverture");
-        return 1;
-    }
+    t_bmp8 * test = bmp8_loadImage("barbara_gray.bmp");
+    bmp8_saveImage("testsave.bmp", test);
+    //printf("%d", test->height);
 
-    char c;
-    while ((c = fgetc(fichier)) != EOF) {
-        putchar(c);
-    }
-
-    fclose(fichier);
     return 0;
 }
