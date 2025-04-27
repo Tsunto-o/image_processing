@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.30"
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "image_processing::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-image_processing-Debug-c927062e0f5972e5f840.json",
+					"jsonFile" : "target-image_processing-Debug-452ad6002b5b07b91059.json",
 					"name" : "image_processing",
 					"projectIndex" : 0
 				}
@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/cygdrive/c/Users/tsunt/Desktop/image-processing/cmake-build-debug",
-		"source" : "/cygdrive/c/Users/tsunt/Desktop/image-processing"
+		"build" : "C:/Users/Gia-Vinh/Desktop/image_processing/cmake-build-debug",
+		"source" : "C:/Users/Gia-Vinh/Desktop/image_processing"
 	},
 	"version" : 
 	{
