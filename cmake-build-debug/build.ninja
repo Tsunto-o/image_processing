@@ -57,6 +57,14 @@ build CMakeFiles/image_processing.dir/main.c.o: C_COMPILER__image_processing_uns
   TARGET_COMPILE_PDB = CMakeFiles/image_processing.dir/
   TARGET_PDB = image_processing.pdb
 
+build CMakeFiles/image_processing.dir/bmp24.c.o: C_COMPILER__image_processing_unscanned_Debug /cygdrive/c/Users/tsunt/Desktop/image-processing/bmp24.c || cmake_object_order_depends_target_image_processing
+  DEP_FILE = CMakeFiles/image_processing.dir/bmp24.c.o.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles/image_processing.dir
+  OBJECT_FILE_DIR = CMakeFiles/image_processing.dir
+  TARGET_COMPILE_PDB = CMakeFiles/image_processing.dir/
+  TARGET_PDB = image_processing.pdb
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target image_processing
@@ -65,7 +73,7 @@ build CMakeFiles/image_processing.dir/main.c.o: C_COMPILER__image_processing_uns
 #############################################
 # Link the executable image_processing.exe
 
-build image_processing.exe: C_EXECUTABLE_LINKER__image_processing_Debug CMakeFiles/image_processing.dir/main.c.o
+build image_processing.exe: C_EXECUTABLE_LINKER__image_processing_Debug CMakeFiles/image_processing.dir/main.c.o CMakeFiles/image_processing.dir/bmp24.c.o
   FLAGS = -g
   LINK_FLAGS = -Wl,--enable-auto-import
   OBJECT_DIR = CMakeFiles/image_processing.dir

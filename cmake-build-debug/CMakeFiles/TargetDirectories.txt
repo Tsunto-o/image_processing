@@ -1,3 +1,3 @@
-C:/Users/Gia-Vinh/Desktop/image_processing/cmake-build-debug/CMakeFiles/image_processing.dir
-C:/Users/Gia-Vinh/Desktop/image_processing/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Gia-Vinh/Desktop/image_processing/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/cygdrive/c/Users/tsunt/Desktop/image-processing/cmake-build-debug/CMakeFiles/image_processing.dir
+/cygdrive/c/Users/tsunt/Desktop/image-processing/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cygdrive/c/Users/tsunt/Desktop/image-processing/cmake-build-debug/CMakeFiles/rebuild_cache.dir

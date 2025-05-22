@@ -40,7 +40,7 @@ t_bmp8 * bmp8_loadImage(const char * filename){
       return NULL;
    }
 
-   // Lecture offset de début des données d'image
+   //lecture offset de début des données d'image
    unsigned int offset = *(unsigned int *)&img->header[10];
 
    //alloc dynamique pour data
