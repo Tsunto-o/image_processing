@@ -71,8 +71,6 @@ int main() {
 
     t_bmp24 * test24 = bmp24_loadImage("flowers_color.bmp");
 
-    printf("%f, %f", test24->height, test24->width);
-
     //printf("%d", test->height);
 
     return 0;

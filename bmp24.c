@@ -127,6 +127,30 @@ t_bmp24 * bmp24_loadImage(const char * filename) {
     t_bmp24 * img = malloc(sizeof(t_bmp24)); //allocation dynamique pour l'image
 
 
+    unsigned char * header = malloc(54*sizeof(unsigned char));
+    fread(header, 54, 1, fichier);
+
+    img->header.type= *(uint16_t *)&header[2];
+    img->header.size = *(uint32_t *)&header[4];
+    img->header.reserved2= *(uint16_t *)&header[6];
+    img->header.reserved2 = *(uint16_t *)&header[8];
+    img->header.offset = *(uint32_t *)&header[10];
+
+    img->header_info.size = *(uint32_t *)&header[4];
+    img->header_info.width = *(int32_t *)&header[18];
+    img->header_info.height = *(int32_t *)&header[22];
+    img->header_info.planes = *(uint16_t *)&header[26];
+    img->header_info.bits = *(uint16_t *)&header[28];
+    img->header_info.compression = *(uint32_t *)&header[30];
+    img->header_info.imagesize = *(uint32_t *)&header[34];
+    img->header_info.xresolution = *(int32_t*)&header[38];
+    img->header_info.yresolution = *(int32_t *)&header[42];
+    img->header_info.ncolors = *(uint32_t *)&header[46];
+    img->header_info.importantcolors = *(uint32_t *)&header[50];
+
+
+    printf("%x", *(unsigned int *)&header[0]);
+
 }
 
 
