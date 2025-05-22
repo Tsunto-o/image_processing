@@ -3,6 +3,4 @@ project(image_processing C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(image_processing main.c
-        bmp24.c
-        bmp24.h)
+add_executable(image_processing main.c)

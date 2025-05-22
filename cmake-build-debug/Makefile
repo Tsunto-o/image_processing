@@ -128,30 +128,6 @@ image_processing/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_processing.dir\build.make CMakeFiles/image_processing.dir/build
 .PHONY : image_processing/fast
 
-bmp24.obj: bmp24.c.obj
-.PHONY : bmp24.obj
-
-# target to build an object file
-bmp24.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_processing.dir\build.make CMakeFiles/image_processing.dir/bmp24.c.obj
-.PHONY : bmp24.c.obj
-
-bmp24.i: bmp24.c.i
-.PHONY : bmp24.i
-
-# target to preprocess a source file
-bmp24.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_processing.dir\build.make CMakeFiles/image_processing.dir/bmp24.c.i
-.PHONY : bmp24.c.i
-
-bmp24.s: bmp24.c.s
-.PHONY : bmp24.s
-
-# target to generate assembly for a file
-bmp24.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\image_processing.dir\build.make CMakeFiles/image_processing.dir/bmp24.c.s
-.PHONY : bmp24.c.s
-
 main.obj: main.c.obj
 .PHONY : main.obj
 
@@ -185,9 +161,6 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... image_processing
-	@echo ... bmp24.obj
-	@echo ... bmp24.i
-	@echo ... bmp24.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

@@ -96,26 +96,21 @@ void bmp24_free(t_bmp24 *img) {
 }
 
 
-
-
-
-
 void file_rawRead (uint32_t position, void * buffer, uint32_t size, size_t n, FILE * file) {
-    fseek(file, position, SEEK_SET);
-    fread(buffer, size, n, file);
+fseek(file, position, SEEK_SET);
+fread(buffer, size, n, file);
 }
 
-void file_rawWrite (uint32_t position, void * buffer, uint32_t size, size_t n, FILE * file) {
-    fseek(file, position, SEEK_SET);
-    fwrite(buffer, size, n, file);
-}
+
+
+
+
 
 
 
 
 t_bmp24 * bmp24_loadImage(const char * filename) {
     /* permet de lire une image en niveaux de gris à partir d’un fichier BMP dont le nom (chemin) renseigné par le paramètre filename */
-
     FILE *fichier = fopen(filename, "rb"); //Ouverture du fichier
 
     //message d'erreur en cas d'échec d'ouverture du fichier ou fichier vide
@@ -123,13 +118,28 @@ t_bmp24 * bmp24_loadImage(const char * filename) {
         perror("Erreur d'ouverture");
         return NULL;
     }
-
     t_bmp24 * img = malloc(sizeof(t_bmp24)); //allocation dynamique pour l'image
-
 
     unsigned char * header = malloc(54*sizeof(unsigned char));
     fread(header, 54, 1, fichier);
 
+
+    // Lecture de l'identifiant du fichier (magic number)
+    uint16_t magic;
+    file_rawRead(BITMAP_MAGIC, &magic, sizeof(uint16_t), 1, fichier);
+    if (magic != BMP_TYPE) {
+        fprintf(stderr, "Erreur : ce fichier n'est pas un BMP valide.\n");
+        fclose(fichier);
+        return NULL;
+    }
+
+    // Lecture des dimensions
+    int32_t width, height;
+    file_rawRead(BITMAP_WIDTH, &width, sizeof(int32_t), 1, fichier);
+    file_rawRead(BITMAP_HEIGHT, &height, sizeof(int32_t), 1, fichier);
+
+
+    /*
     img->header.type= *(uint16_t *)&header[2];
     img->header.size = *(uint32_t *)&header[4];
     img->header.reserved2= *(uint16_t *)&header[6];
@@ -142,15 +152,16 @@ t_bmp24 * bmp24_loadImage(const char * filename) {
     img->header_info.planes = *(uint16_t *)&header[26];
     img->header_info.bits = *(uint16_t *)&header[28];
     img->header_info.compression = *(uint32_t *)&header[30];
-    img->header_info.imagesize = *(uint32_t *)&header[34];
+    img->header_info.imagesize = img->header_info.width * img->header_info.height * img->header_info.compression;
     img->header_info.xresolution = *(int32_t*)&header[38];
     img->header_info.yresolution = *(int32_t *)&header[42];
     img->header_info.ncolors = *(uint32_t *)&header[46];
     img->header_info.importantcolors = *(uint32_t *)&header[50];
+    printf("%u", img->header_info.imagesize);
+    */
 
 
-    printf("%x", *(unsigned int *)&header[0]);
-
+    return img;
 }
 
 

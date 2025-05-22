@@ -31,7 +31,7 @@ t_bmp8 * bmp8_loadImage(const char * filename){
    img->width = *(unsigned int *)&img->header[18];
    img->height = *(unsigned int *)&img->header[22];
    img->colorDepth = *(unsigned int *)&img->header[28];
-   img->dataSize = ((img->width * img->colorDepth + 31) / 32) * 4 * img->height;
+   img->dataSize = img->width * img->height;
    fread(img->colorTable, 1024, 1, fichier); // Lis la palette
 
    //message d'erreur si profondeur diff de 8 bits

@@ -46,7 +46,7 @@ int main() {
     emboss[0][0] = -2; emboss[0][1] = -1; emboss[0][2] = 0;
     emboss[1][0] = -1; emboss[1][1] = 1; emboss[1][2] = 1;
     emboss[2][0] = 0; emboss[2][1] = 1; emboss[2][2] = 2;
-    */
+
 
     //Kernel de Sharpen
     float *sharpen[3];
@@ -59,19 +59,19 @@ int main() {
 
 
 
-    t_bmp8 * test = bmp8_loadImage("barbara_gray.bmp");
+    t_bmp8 * test = bmp8_loadImage("C:/Users/Gia-Vinh/Desktop/image_processing/barbara_gray.bmp");
     bmp8_printInfo(test);
 
     bmp8_applyFilter(test, sharpen, 3);
     for (int i = 0; i < 3; i++) {
         free(sharpen[i]);
     }
-    bmp8_saveImage("sharpen.bmp", test);
+    bmp8_saveImage("C:/Users/Gia-Vinh/Desktop/image_processing/sharpen.bmp", test);
+    */
 
+    t_bmp24 * test24 = bmp24_loadImage("C:/Users/Gia-Vinh/Desktop/image_processing/barbara_gray.bmp");
 
-    t_bmp24 * test24 = bmp24_loadImage("flowers_color.bmp");
-
-    //printf("%d", test->height);
+    //printf("%x", test24->header.type);
 
     return 0;
 }
