@@ -109,84 +109,108 @@ void file_rawWrite (uint32_t position, void * buffer, uint32_t size, size_t n, F
 }
 
 
+void bmp24_readPixelData(t_bmp24 *image, FILE *file) {
+    if (!image || !file) return;
+    for (int y = 0; y <= image->height - 1; y++) {
+        for (int x = 0; x < image->width; x++) {
+            uint8_t couleurs[3];
+            if (fread(couleurs, 1, 3, file) != 3) {
+                return;
+            }
+            image->data[y][x].blue  = couleurs[0];
+            image->data[y][x].green = couleurs[1];
+            image->data[y][x].red   = couleurs[2];
+
+
+        }
+    }
+}
+
+void bmp24_writePixelData(t_bmp24 *image, FILE *file) {
+    if (!image || !file || !image->data) return;
+
+    // offset
+    uint32_t base_offset = image->header.offset;
+
+    for (int y = 0; y < image->height; y++) {
+        for (int x = 0; x < image->width; x++) {
+            int inverted_y = image->height - 1 - y;
+            uint32_t pixel_offset = base_offset + (inverted_y * image->width + x) * 3;
+
+            // Préparer les données en BGR
+            uint8_t couleurs[3];
+            couleurs[0] = image->data[y][x].blue;
+            couleurs[1] = image->data[y][x].green;
+            couleurs[2] = image->data[y][x].red;
+
+            file_rawWrite(pixel_offset, couleurs, sizeof(uint8_t), 3, file);
+        }
+    }
+}
 
 
 
 
-t_bmp24 * bmp24_loadImage(const char * filename) {
-    /* permet de lire une image en niveaux de gris à partir d’un fichier BMP dont le nom (chemin) renseigné par le paramètre filename */
 
-    FILE *fichier = fopen(filename, "rb"); //Ouverture du fichier
-    //message d'erreur en cas d'échec d'ouverture du fichier ou fichier vide
-    if (!fichier) {
-        perror("Erreur d'ouverture");
+
+t_bmp24 *bmp24_loadImage(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+        printf("Erreur : impossible d'ouvrir le fichier %s\n", filename);
         return NULL;
     }
 
     t_bmp24 *img = malloc(sizeof(t_bmp24));
-    if (!img) {
-        perror("Erreur d'allocation de l'image");
-        fclose(fichier);
+    if (img == NULL) {
+        fclose(file);
         return NULL;
     }
 
-    //de 0 à 14 dans img.header
-    file_rawRead(BITMAP_MAGIC, &img->header, sizeof(t_bmp_header), 1, fichier);
+    file_rawRead(0, &img->header, sizeof(t_bmp_header), 1, file);
+    file_rawRead(14, &img->header_info, sizeof(t_bmp_info), 1, file);
 
-    //de 14 à suite dans img.header_info
-    file_rawRead(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
-
-    //vraie taille de l'image
-    img->header_info.imagesize = img->header_info.width * img->header_info.height;
+    img->width = img->header_info.width;
+    img->height = img->header_info.height;
+    img->colorDepth = img->header_info.bits;
 
 
-    //allouer matrice pixels
     img->data = bmp24_allocateDataPixels(img->width, img->height);
-    if (!img->data) {
-        fprintf(stderr, "Erreur d'allocation des pixels.\n");
-        free(img);
-        fclose(fichier);
+    if (img->data == NULL) {
+        bmp24_free(img);
+        fclose(file);
         return NULL;
     }
 
-    //remplir matrice
-    for (int i = img->height - 1; i >= 0; i--) {
-        fread(img->data[i], sizeof(t_pixel), img->width, fichier);
-    }
 
-    fclose(fichier);
+    bmp24_readPixelData(img, file);
+
+    fclose(file);
     return img;
 }
 
 
 
 void bmp24_saveImage(t_bmp24 *img, const char *filename) {
-    FILE *file = fopen(filename, "wb");
-    if (!file) {
-        perror("Erreur lors de l'ouverture du fichier pour écriture");
+    /*permet d’écrire une image en niveaux de gris dans un fichier BMP dont le nom (chemin) est renseigné par le paramètre filename */
+
+    //Ouverture du fichier et vérification erreur
+    FILE *fichier = fopen(filename, "wb");
+    if (fichier == NULL) {
+        perror("Erreur lors de l'ouverture du fichier en écriture");
         return;
     }
 
-    // Écriture de l'en-tête BMP (14 octets)
-    file_rawWrite(0, &img->header, sizeof(t_bmp_header), 1, file);
+    //Ecriture en-tête BMP (54oc)
+    fwrite(&img->header, 1, sizeof(t_bmp_header), fichier);
 
-    // Écriture de l'en-tête info BMP (40 octets)
-    file_rawWrite(14, &img->header_info, sizeof(t_bmp_info), 1, file);
+    //Ecriture table couleurs (palette 8 bits = 1024 octets)
+    fwrite(&img->header, 1, sizeof(t_bmp_header), fichier);
 
-    // Calcul du padding pour que chaque ligne soit un multiple de 4 octets
-    int rowSize = img->width * 3;
-    int padding = (4 - (rowSize % 4)) % 4;
-    uint8_t pad[3] = {0};
-
-    // Positionner le curseur au début des données de pixels
-    fseek(file, img->header.offset, SEEK_SET);
-
-    // Écrire les pixels de bas en haut (format BMP 24 bits)
-    for (int i = img->height - 1; i >= 0; i--) {
-        fwrite(img->data[i], sizeof(t_pixel), img->width, file);
-        fwrite(pad, 1, padding, file);  // Ajout du padding si nécessaire
+    //Ecriture données de l'image
+    size_t ecrits = fwrite(img->data, 1, img->dataSize, fichier);
+    if (ecrits != img->dataSize) {
+        perror("Erreur lors de l'écriture des données d'image");
     }
 
-    fclose(file);
+    fclose(fichier);
 }
-

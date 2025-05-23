@@ -69,9 +69,14 @@ int main() {
     bmp8_saveImage("C:/Users/Gia-Vinh/Desktop/image_processing/sharpen.bmp", test);
     */
 
+
     t_bmp24 * test24 = bmp24_loadImage("barbara_gray.bmp");
-    printf("%x", test24->data);
-    //bmp24_saveImage("test.bmp", test24);
+    printf("%d ", test24->data[10][10].blue);
+
+    //printf("%x", test24->height);
+    bmp24_saveImage("test.bmp", test24);
+
+
 
     return 0;
 }
