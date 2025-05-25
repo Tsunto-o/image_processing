@@ -161,7 +161,7 @@ int menu() {
                             printf("Filtre Luminosité appliqué.\n"); break;
 
 
-                        case 3: printf("Filtre Binarisation appliqué.\n"); break;
+                        case 3:
                             bmp24_grayscale(image);
                             printf("Filtre Binarisation appliqué.\n"); break;
 

@@ -115,37 +115,53 @@ void file_rawWrite (uint32_t position, void * buffer, uint32_t size, size_t n, F
 }
 
 
-void bmp24_readPixelData(t_bmp24 *image, FILE *file) {
-    if (!image || !file) return;
-    for (int y = image->height-1; y >= 0; y--) {
-        for (int x = 0; x < image->width; x++) {
-            uint8_t couleurs[3];
-            if (fread(couleurs, 1, 3, file) != 3) {
-                return;
-            }
-            image->data[y][x].blue  = couleurs[0];
-            image->data[y][x].green = couleurs[1];
-            image->data[y][x].red   = couleurs[2];
-        }
+void bmp24_readPixelValue(t_bmp24 * img,  int x, int y, FILE * file){
+    if (!(img->height%4 == 0) || !(img->width%4 == 0)) {
+        printf("Error : invalid image size (%d,%d)\n", img->height, img->width);
+        return;
     }
+    //lire l'offset du fichier BMP
+    uint32_t offset  = img->header.offset;
+    // taille d'une ligne en octets (3 octets par pixel)
+    uint32_t rowSize = img->width * 3;
+    // inversion verticale (BMP stocke du bas vers le haut)
+    uint32_t fileY = img->height - 1 - y;
+    // position dans le fichier
+    uint32_t pos = offset + fileY * rowSize + x * 3;
+
+    unsigned char bgr[3];
+    file_rawRead(pos, bgr, 1, 3, file);
+
+    // stockage en RGB
+    img->data[y][x].red   = bgr[2];
+    img->data[y][x].green = bgr[1];
+    img->data[y][x].blue  = bgr[0];;
+
 }
 
+void bmp24_readPixelData(t_bmp24 *img, FILE *file) {
+    for (int y = 0; y < img->height; y++)
+        for (int x = 0; x < img->width; x++)
+            bmp24_readPixelValue(img, x, y, file);
+}
+//@brief Écrit la valeur du pixel (x,y) depuis image->data[y][x] dans le fichier BMP.
+
+void bmp24_writePixelValue(t_bmp24 *img, int x, int y, FILE *file) {
+    uint32_t offset  = img->header.offset;
+    uint32_t rowsize = img->width*3;
+    uint32_t fileY = (uint32_t)img->height - 1 - (uint32_t) y;
+    uint32_t position = offset + fileY * rowsize + (uint32_t)x * 3;
+
+    // Préparer les 3 octets en ordre B, G, R
+    unsigned char bgr[3] = { img->data[y][x].blue, img->data[y][x].green, img->data[y][x].red };
+    // Écrire ces 3 octets
+    file_rawWrite(position, bgr, 1, 3, file); }
 
 
 void bmp24_writePixelData(t_bmp24 *image, FILE *file) {
-    if (!image || !file || !image->data) return;
-
-    // offset
-    uint32_t base_offset = image->header.offset;
-
-    for (int y = image->height - 1; y >= 0; y--) {
+    for (int y = 0; y < image->height; y++) {
         for (int x = 0; x < image->width; x++) {
-            // Format BGR pour les fichiers BMP
-            unsigned char bgr[3];
-            bgr[0] = image->data[y][x].blue;
-            bgr[1] = image->data[y][x].green;
-            bgr[2] = image->data[y][x].red;
-            fwrite(bgr, sizeof(unsigned char), 3, file);
+            bmp24_writePixelValue(image, x, y, file);
         }
     }
 }
