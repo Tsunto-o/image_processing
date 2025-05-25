@@ -11,11 +11,17 @@ Ce projet en langage C permet de charger, modifier et sauvegarder des images au 
 
 - Chargement d’une image BMP 24 bits (`bmp24_loadImage`)
 - Sauvegarde d’une image modifiée (`bmp24_saveImage`)
+- Affichage des données de l'image
 - Filtres d’image :
   - **Négatif** : inversion des couleurs (`bmp24_negative`)
-  - **Niveaux de gris** : conversion en noir et blanc (`bmp24_grayscale`)
+  - **Binarisation** : conversion en noir et blanc (`bmp24_grayscale`)
   - **Luminosité** : ajustement de l’intensité lumineuse (`bmp24_brightness`)
-- (Optionnel) Application de filtres par convolution (ex : flou, détection de contours)
+  - **Flou** 
+  - **Flou Gaussien** 
+  - **Netteté** 
+  - **Contours**
+  - **Relief**
+
 
 
 ## Utilisation
