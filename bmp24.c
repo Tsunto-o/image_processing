@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "bmp24.h"
 
+#include <math.h>
+
 // Constantes pour les offsets des champs de l'en-tête BMP
 #define BITMAP_MAGIC 0x00 // offset 0
 #define BITMAP_SIZE 0x02 // offset 2
@@ -57,6 +59,8 @@ void bmp24_freeDataPixels (t_pixel ** pixels, int height) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 t_bmp24 *bmp24_allocate(int width, int height, int colorDepth) {
     // Allouer la structure t_bmp24
@@ -96,6 +100,8 @@ void bmp24_free(t_bmp24 *img) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 void file_rawRead (uint32_t position, void * buffer, uint32_t size, size_t n, FILE * file) {
@@ -111,7 +117,7 @@ void file_rawWrite (uint32_t position, void * buffer, uint32_t size, size_t n, F
 
 void bmp24_readPixelData(t_bmp24 *image, FILE *file) {
     if (!image || !file) return;
-    for (int y = 0; y <= image->height - 1; y++) {
+    for (int y = image->height-1; y >= 0; y--) {
         for (int x = 0; x < image->width; x++) {
             uint8_t couleurs[3];
             if (fread(couleurs, 1, 3, file) != 3) {
@@ -120,11 +126,11 @@ void bmp24_readPixelData(t_bmp24 *image, FILE *file) {
             image->data[y][x].blue  = couleurs[0];
             image->data[y][x].green = couleurs[1];
             image->data[y][x].red   = couleurs[2];
-
-
         }
     }
 }
+
+
 
 void bmp24_writePixelData(t_bmp24 *image, FILE *file) {
     if (!image || !file || !image->data) return;
@@ -132,42 +138,37 @@ void bmp24_writePixelData(t_bmp24 *image, FILE *file) {
     // offset
     uint32_t base_offset = image->header.offset;
 
-    for (int y = 0; y < image->height; y++) {
+    for (int y = image->height - 1; y >= 0; y--) {
         for (int x = 0; x < image->width; x++) {
-            int inverted_y = image->height - 1 - y;
-            uint32_t pixel_offset = base_offset + (inverted_y * image->width + x) * 3;
-
-            // Préparer les données en BGR
-            uint8_t couleurs[3];
-            couleurs[0] = image->data[y][x].blue;
-            couleurs[1] = image->data[y][x].green;
-            couleurs[2] = image->data[y][x].red;
-
-            file_rawWrite(pixel_offset, couleurs, sizeof(uint8_t), 3, file);
+            // Format BGR pour les fichiers BMP
+            unsigned char bgr[3];
+            bgr[0] = image->data[y][x].blue;
+            bgr[1] = image->data[y][x].green;
+            bgr[2] = image->data[y][x].red;
+            fwrite(bgr, sizeof(unsigned char), 3, file);
         }
     }
 }
 
 
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 t_bmp24 *bmp24_loadImage(const char *filename) {
-    FILE *file = fopen(filename, "rb");
-    if (file == NULL) {
+    FILE *fichier = fopen(filename, "rb");
+    if (fichier == NULL) {
         printf("Erreur : impossible d'ouvrir le fichier %s\n", filename);
         return NULL;
     }
 
     t_bmp24 *img = malloc(sizeof(t_bmp24));
     if (img == NULL) {
-        fclose(file);
+        fclose(fichier);
         return NULL;
     }
 
-    file_rawRead(0, &img->header, sizeof(t_bmp_header), 1, file);
-    file_rawRead(14, &img->header_info, sizeof(t_bmp_info), 1, file);
+    file_rawRead(0, &img->header, sizeof(t_bmp_header), 1, fichier);
+    file_rawRead(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
 
     img->width = img->header_info.width;
     img->height = img->header_info.height;
@@ -176,22 +177,26 @@ t_bmp24 *bmp24_loadImage(const char *filename) {
 
     img->data = bmp24_allocateDataPixels(img->width, img->height);
     if (img->data == NULL) {
+        printf("Erreur : données de l'image erronnée\n");
         bmp24_free(img);
-        fclose(file);
+        fclose(fichier);
         return NULL;
     }
 
+    bmp24_readPixelData(img, fichier);
 
-    bmp24_readPixelData(img, file);
+    printf("Image chargée avec succès !\n");
 
-    fclose(file);
+    fclose(fichier);
     return img;
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp24_saveImage(t_bmp24 *img, const char *filename) {
-    /*permet d’écrire une image en niveaux de gris dans un fichier BMP dont le nom (chemin) est renseigné par le paramètre filename */
+    //permet d’écrire une image en niveaux de gris dans un fichier BMP dont le nom (chemin) est renseigné par le paramètre filename
 
     //Ouverture du fichier et vérification erreur
     FILE *fichier = fopen(filename, "wb");
@@ -200,17 +205,115 @@ void bmp24_saveImage(t_bmp24 *img, const char *filename) {
         return;
     }
 
-    //Ecriture en-tête BMP (54oc)
-    fwrite(&img->header, 1, sizeof(t_bmp_header), fichier);
 
-    //Ecriture table couleurs (palette 8 bits = 1024 octets)
-    fwrite(&img->header, 1, sizeof(t_bmp_header), fichier);
+    file_rawWrite(0, &img->header, sizeof(t_bmp_header), 1, fichier);
+    file_rawWrite(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
 
-    //Ecriture données de l'image
-    size_t ecrits = fwrite(img->data, 1, img->dataSize, fichier);
-    if (ecrits != img->dataSize) {
-        perror("Erreur lors de l'écriture des données d'image");
-    }
+    bmp24_writePixelData(img, fichier);
+
+    printf("Image sauvegardée avec succès !\n");
 
     fclose(fichier);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void bmp24_applyFilter(t_bmp24 *image, float **kernel, int kernelSize) {
+    if (!image || !kernel || kernelSize <= 0) return;
+    int width = image->width, height = image->height;
+    int offset = kernelSize / 2;
+
+    // Allocation temporaire et copie des pixels originaux
+    t_pixel **temp = bmp24_allocateDataPixels(width,height);
+    if (!temp) return;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            temp[y][x] = image->data[y][x];
+        }
+    }
+    //printf("Fin mapping pixels\n");
+    // Application du filtre convolution sur chaque canal
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            double sumR = 0.0, sumG = 0.0, sumB = 0.0;
+            for (int ky = 0; ky < kernelSize; ky++) {
+                for (int kx = 0; kx < kernelSize; kx++) {
+                    int xx = x + kx - offset;
+                    int yy = y + ky - offset;
+                    if (xx >= 0 && xx < width && yy >= 0 && yy < height) {
+                        t_pixel *p = &temp[yy][xx];
+                        float kval = kernel[ky][kx];
+                        sumR += p->red * kval;
+                        sumG += p->green * kval;
+                        sumB += p->blue * kval;
+                    }
+                }
+            }
+
+            // Clamp et assignation dans l'image originale
+            int vR = (int)sumR; if (vR < 0) vR = 0; if (vR > 255) vR = 255;
+            int vG = (int)sumG; if (vG < 0) vG = 0; if (vG > 255) vG = 255;
+            int vB = (int)sumB; if (vB < 0) vB = 0; if (vB > 255) vB = 255;
+            image->data[y][x].red = (unsigned char)vR;
+            image->data[y][x].green = (unsigned char)vG;
+            image->data[y][x].blue = (unsigned char)vB;
+        }
+    }
+    printf("Filtre applique !\n");
+    bmp24_freeDataPixels(temp,height);
+}
+
+void bmp24_negative(t_bmp24 *img) {
+    int width = img->width;
+    int height = img->height;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            img->data[y][x].red = 255 - img->data[y][x].red;
+            img->data[y][x].green = 255 - img->data[y][x].green;
+            img->data[y][x].blue = 255 - img->data[y][x].blue;
+        }
+    }
+}
+
+void bmp24_grayscale(t_bmp24 * img) {
+    int width = img->width;
+    int height = img->height;
+    int moyenne;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            moyenne = (img->data[y][x].red + img->data[y][x].blue + img->data[y][x].green)/3;
+            img->data[y][x].red = moyenne;
+            img->data[y][x].blue = moyenne;
+            img->data[y][x].green = moyenne;
+        }
+    }
+}
+
+void bmp24_brightness(t_bmp24 * img, int value) {
+    int width = img->width;
+    int height = img->height;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // On s'assure que la valeur ne dépasse pas 255
+            if (img->data[y][x].red+value<=255)
+                img->data[y][x].red+=value;
+            else
+                img->data[y][x].red = 255;
+
+            if (img->data[y][x].green+value<=255)
+                img->data[y][x].green+=value;
+            else
+                img->data[y][x].green = 255;
+
+            if (img->data[y][x].blue+value<=255)
+                img->data[y][x].blue+=value;
+            else
+                img->data[y][x].blue = 255;
+
+        }
+    }
+}
+
