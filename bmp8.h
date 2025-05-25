@@ -10,6 +10,9 @@ typedef struct {
 } t_bmp8;
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 t_bmp8 * bmp8_loadImage(const char * filename);
 /* permet de lire une image en niveaux de gris à partir d’un fichier BMP dont le nom (chemin) renseigné par le paramètre filename */
 
@@ -33,3 +36,19 @@ void bmp8_threshold(t_bmp8 * img, int threshold);
 
 void bmp8_applyFilter(t_bmp8 *img, float **kernel, int kernelSize);
 /* applique un filtre sur une image en niveaux de gris. Cette fonction prend en paramètre un pointeur vers une image de type t_bmp8, une matrice de flottants kernel représentant le noyau du filtre et un entier kernelSize représentant la taille du noyau */
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+unsigned int * bmp8_computeHistogram(t_bmp8 * img);
+/* calcule l’histogramme d’une image 8-bits en niveau de gris */
+
+unsigned int * bmp8_computeCDF(unsigned int * hist);
+/* prend en entrée un tableau d’entiers hist représentant l’histogramme d’une image t_bmp8 et renvoie un tableau d’entiers de taille 256 contenant l’histogramme cumulé puis normalisé hist_eq. */
+
+void bmp8_equalize(t_bmp8 * img);
+/* applique l’égalisation d’histogramme à une image 8-bits en niveau de gris */
+
+void bmp8_equalize(t_bmp8 * img);
+/* applique l’égalisation d’histogramme à une image 8-bits en niveau de gris */

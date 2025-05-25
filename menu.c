@@ -6,10 +6,11 @@
 #include <stdio.h>
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
 
 float **Allocate_Kernel() {
+    /* allocation mémoire pour tableau kernel */
     float **kernel = malloc(3 * sizeof(float *));
     if (!kernel) {
         perror("Erreur d'allocation du tableau de lignes");
@@ -30,7 +31,11 @@ float **Allocate_Kernel() {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 void freeKernel(float **kernel, int size) {
+    /* libère mémoire allouée pour kernel */
     if (!kernel) return;
 
     for (int i = 0; i < size; i++) {
@@ -39,9 +44,12 @@ void freeKernel(float **kernel, int size) {
     free(kernel);
 }
 
-#include <stdio.h>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp24_printInfo(t_bmp24 *image) {
+    /* affiche les informations sur le fichier */
     if (!image) {
         printf("Image invalide (NULL)\n");
         return;
@@ -74,17 +82,11 @@ void bmp24_printInfo(t_bmp24 *image) {
 }
 
 
-
-
-
-
-
-
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 int menu() {
+    //Gestion de l'interface
     int choix, brightness;
     char cheminFichier[256];
     do {

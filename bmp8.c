@@ -1,17 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "bmp8.h"
 
-/*
-   unsigned char header[54];
-   unsigned char colorTable[1024];
-   unsigned char * data;
 
-   unsigned int width;
-   unsigned int height;
-   unsigned int colorDepth;
-   unsigned int dataSize;
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 t_bmp8 * bmp8_loadImage(const char * filename){
    /* permet de lire une image en niveaux de gris à partir d’un fichier BMP dont le nom (chemin) renseigné par le paramètre filename */
@@ -57,6 +51,8 @@ t_bmp8 * bmp8_loadImage(const char * filename){
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp8_saveImage(const char *filename, t_bmp8 *img) {
    /*permet d’écrire une image en niveaux de gris dans un fichier BMP dont le nom (chemin) est renseigné par le paramètre filename */
@@ -84,6 +80,8 @@ void bmp8_saveImage(const char *filename, t_bmp8 *img) {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp8_free(t_bmp8 *img) {
    /*  permet de libérer la mémoire allouée pour stocker une image de type t_bmp8. */
@@ -95,6 +93,8 @@ void bmp8_free(t_bmp8 *img) {
    }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void bmp8_printInfo(t_bmp8 *img) {
@@ -113,6 +113,8 @@ void bmp8_printInfo(t_bmp8 *img) {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp8_negative(t_bmp8 *img) {
    /* permet d’inverser les couleurs d’une image en niveaux de gris. Elle prend en paramètre un pointeur vers une image de type t_bmp8 */
@@ -126,6 +128,8 @@ void bmp8_negative(t_bmp8 *img) {
    }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void bmp8_brightness(t_bmp8 *img, int value) {
@@ -148,6 +152,8 @@ void bmp8_brightness(t_bmp8 *img, int value) {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void bmp8_threshold(t_bmp8 *img, int threshold) {
    /* permet de transformer une image en niveaux de gris en une image binaire. Elle prend en paramètre un pointeur vers une image de type t_bmp8 et un entier threshold */
@@ -165,6 +171,8 @@ void bmp8_threshold(t_bmp8 *img, int threshold) {
    }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void bmp8_applyFilter(t_bmp8 *img, float **kernel, int kernelSize) {
@@ -217,4 +225,90 @@ void bmp8_applyFilter(t_bmp8 *img, float **kernel, int kernelSize) {
    }
 
    free(newData); // libère mémoire temporaire
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+unsigned int * bmp8_computeHistogram(t_bmp8 * img) {
+   /*calcule l’histogramme d’une image 8-bits en niveau de gris*/
+   //vérification validité pointeur
+   if (img == NULL || img->data == NULL) {
+      return NULL;
+   }
+
+   //allocation tableau 256 entiers pour niveaux de gris
+   unsigned int *histogram = (unsigned int *)calloc(256, sizeof(unsigned int));
+   if (histogram == NULL) {
+      return NULL; // Échec de l'allocation mémoire
+   }
+
+   // Parcourir pixels de l'image
+   for (unsigned int i = 0; i < img->dataSize; i++) {
+      unsigned char gray = img->data[i]; // Chaque pixel est un niveau de gris entre 0 et 255
+      histogram[gray]++;
+   }
+   return histogram;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+unsigned int * bmp8_computeCDF(unsigned int * hist) {
+   /* prend en entrée un tableau d’entiers hist représentant l’histogramme d’une image t_bmp8 et renvoie un tableau d’entiers de taille 256 contenant l’histogramme cumulé puis normalisé hist_eq. */
+   unsigned int * cdf = malloc(256 * sizeof(unsigned int));
+   if (!cdf) return NULL;  // Vérification allocation
+
+   cdf[0] = hist[0];
+   for (int i = 1; i < 256; i++) {
+      cdf[i] = cdf[i - 1] + hist[i];
+   }
+
+   return cdf;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void bmp8_equalize(t_bmp8 * img) {
+   /* applique l’égalisation d’histogramme à une image 8-bits en niveau de gris */
+   unsigned int * hist = bmp8_computeHistogram(img);
+   if (!hist) return;  // sécurité
+
+   unsigned int * cdf = bmp8_computeCDF(hist);
+   free(hist);  // libérer l'histogramme car plus utile
+
+   if (!cdf) return;  // sécurité
+
+   // Trouver cdfmin (premier cdf non nul)
+   unsigned int cdfmin = 0;
+   for (int i = 0; i < 256; i++) {
+      if (cdf[i] != 0) {
+         cdfmin = cdf[i];
+         break;
+      }
+   }
+
+   // Nombre total de pixels
+   unsigned int totalPixels = img->dataSize;
+
+   // Egalisation classique : remapping des pixels
+   for (unsigned int i = 0; i < totalPixels; i++) {
+      unsigned int pixel = img->data[i];
+      // Formule classique d'égalisation :
+      // newPixel = round( (cdf[pixel] - cdfmin) / (totalPixels - cdfmin) * 255 )
+      if (totalPixels == cdfmin) {
+         // éviter division par zéro, on laisse inchangé
+         img->data[i] = pixel;
+      } else {
+         unsigned int val = (unsigned int)( ( (double)(cdf[pixel] - cdfmin) / (totalPixels - cdfmin) ) * 255.0 + 0.5 );
+         if (val > 255) val = 255;
+         img->data[i] = (unsigned char) val;
+      }
+   }
+
+   free(cdf);  // libération du CDF
 }
