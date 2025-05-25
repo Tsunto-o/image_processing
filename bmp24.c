@@ -167,7 +167,12 @@ t_bmp24 *bmp24_loadImage(const char *filename) {
         return NULL;
     }
 
-    file_rawRead(0, &img->header, sizeof(t_bmp_header), 1, fichier);
+    file_rawRead(0,  &img->header.type,      sizeof(uint16_t), 1, fichier); // type
+    file_rawRead(2,  &img->header.size,      sizeof(uint32_t), 1, fichier); // size
+    file_rawRead(6,  &img->header.reserved1, sizeof(uint16_t), 1, fichier); // reserved1
+    file_rawRead(8,  &img->header.reserved2, sizeof(uint16_t), 1, fichier); // reserved2
+    file_rawRead(10, &img->header.offset,    sizeof(uint32_t), 1, fichier); // offset
+
     file_rawRead(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
 
     img->width = img->header_info.width;
@@ -206,7 +211,12 @@ void bmp24_saveImage(t_bmp24 *img, const char *filename) {
     }
 
 
-    file_rawWrite(0, &img->header, sizeof(t_bmp_header), 1, fichier);
+    file_rawWrite(0,  &img->header.type,      sizeof(uint16_t), 1, fichier); // type
+    file_rawWrite(2,  &img->header.size,      sizeof(uint32_t), 1, fichier); // size
+    file_rawWrite(6,  &img->header.reserved1, sizeof(uint16_t), 1, fichier); // reserved1
+    file_rawWrite(8,  &img->header.reserved2, sizeof(uint16_t), 1, fichier); // reserved2
+    file_rawWrite(10, &img->header.offset,    sizeof(uint32_t), 1, fichier); // offset
+
     file_rawWrite(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
 
     bmp24_writePixelData(img, fichier);

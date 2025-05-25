@@ -39,6 +39,40 @@ void freeKernel(float **kernel, int size) {
     free(kernel);
 }
 
+#include <stdio.h>
+
+void bmp24_printInfo(t_bmp24 *image) {
+    if (!image) {
+        printf("Image invalide (NULL)\n");
+        return;
+    }
+
+    printf("\n=== En-tête BMP (BITMAP FILE HEADER) ===\n");
+    printf("Type: 0x%X\n", image->header.type);
+    printf("Taille du fichier: %u octets\n", image->header.size);
+    printf("Réservé1: %u\n", image->header.reserved1);
+    printf("Réservé2: %u\n", image->header.reserved2);
+    printf("Offset des données: %u\n", image->header.offset);
+
+    printf("\n=== En-tête Info BMP (BITMAP INFO HEADER) ===\n");
+    printf("Taille de l'en-tête info: %u octets\n", image->header_info.size);
+    printf("Largeur: %d px\n", image->header_info.width);
+    printf("Hauteur: %d px\n", image->header_info.height);
+    printf("Plans de couleur: %u\n", image->header_info.planes);
+    printf("Bits par pixel: %u\n", image->header_info.bits);
+    printf("Compression: %u\n", image->header_info.compression);
+    printf("Taille de l'image (données): %u octets\n", image->header_info.imagesize);
+    printf("Résolution horizontale: %d px/m\n", image->header_info.xresolution);
+    printf("Résolution verticale: %d px/m\n", image->header_info.yresolution);
+    printf("Couleurs dans la palette: %u\n", image->header_info.ncolors);
+    printf("Couleurs importantes: %u\n", image->header_info.importantcolors);
+
+    printf("\n=== Informations supplémentaires ===\n");
+    printf("Largeur (copie): %d px\n", image->width);
+    printf("Hauteur (copie): %d px\n", image->height);
+    printf("Profondeur de couleur (copie): %d bits\n", image->colorDepth);
+}
+
 
 
 
@@ -220,8 +254,8 @@ int menu() {
             break;
 
             case 4:
-                printf("Vous avez choisi d'afficher les informations de l'image.\n");
-            // Code pour afficher les informations ici
+                bmp24_printInfo(image);
+
             break;
             case 5:
                 printf("Arrêt du programme.\n");
