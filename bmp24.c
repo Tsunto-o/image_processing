@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-// Constantes pour les offsets des champs de l'en-tête BMP
+// Constantes pour les offsets des champs de l'en-tete BMP
 #define BITMAP_MAGIC 0x00 // offset 0
 #define BITMAP_SIZE 0x02 // offset 2
 #define BITMAP_OFFSET 0x0A // offset 10
@@ -13,8 +13,8 @@
 #define BITMAP_DEPTH 0x1C // offset 28
 #define BITMAP_SIZE_RAW 0x22 // offset 34
 // Constante pour le type de fichier BMP
-#define BMP_TYPE 0x4D42 // 'BM' en hexadécimal
-// Constantes pour les tailles des champs de l'en-tête BMP
+#define BMP_TYPE 0x4D42 // 'BM' en hexadecimal
+// Constantes pour les tailles des champs de l'en-tete BMP
 #define HEADER_SIZE 0x0E // 14 octets
 #define INFO_SIZE 0x28 // 40 octets
 // Constantes pour les valeurs de profondeur de couleur
@@ -23,7 +23,7 @@
 
 
 t_pixel **bmp24_allocateDataPixels(int width, int height) {
-    /* Allouer dynamiquement de la mémoire pour une matrice de t_pixel de taille witdh × height, et renvoyer l’adresse allouée dans le tas */
+    /* Allouer dynamiquement de la memoire pour une matrice de t_pixel de taille witdh × height, et renvoyer l’adresse allouee dans le tas */
     //allouer tableau de pointeurs vers pointeurs
     t_pixel**pixels = malloc(height * sizeof(t_pixel *));
     if (pixels == NULL) {
@@ -35,7 +35,7 @@ t_pixel **bmp24_allocateDataPixels(int width, int height) {
         pixels[i] = malloc(width * sizeof(t_pixel));
         // si erreur
         if (pixels[i] == NULL) {
-            //libérer ce qui a déjà été alloué
+            //liberer ce qui a deja ete alloue
             for (int j = 0; j < i; j++) {
                 free(pixels[j]);
             }
@@ -50,14 +50,14 @@ t_pixel **bmp24_allocateDataPixels(int width, int height) {
 
 
 void bmp24_freeDataPixels (t_pixel ** pixels, int height) {
-    /* Libérer toute la mémoire allouée pour la matrice de t_pixel pixels. */
+    /* Liberer toute la memoire allouee pour la matrice de t_pixel pixels. */
     if (pixels == NULL) {
         return;
     }
     for (int i = 0; i < height; i++) {
-        free(pixels[i]); //libérer tableau de pointeurs vers pixels
+        free(pixels[i]); //liberer tableau de pointeurs vers pixels
     }
-    free(pixels);//libérer tableau de tableaux de pointeurs vers pixels
+    free(pixels);//liberer tableau de tableaux de pointeurs vers pixels
 }
 
 
@@ -65,7 +65,7 @@ void bmp24_freeDataPixels (t_pixel ** pixels, int height) {
 
 
 t_bmp24 *bmp24_allocate(int width, int height, int colorDepth) {
-    /* Allouer dynamiquement de la mémoire pour une image t_bmp24 */
+    /* Allouer dynamiquement de la memoire pour une image t_bmp24 */
     // Allouer la structure t_bmp24
     t_bmp24 *image = malloc(sizeof(t_bmp24));
     if (image == NULL) {
@@ -76,7 +76,7 @@ t_bmp24 *bmp24_allocate(int width, int height, int colorDepth) {
     // Allouer la matrice de pixels
     image->data = bmp24_allocateDataPixels(width, height);
     if (image->data == NULL) {
-        // Libérer l’image si l’allocation de data échoue
+        // Liberer l’image si l’allocation de data echoue
         free(image);
         fprintf(stderr, "Erreur lors de l'allocation de la matrice de pixels.\n");
         return NULL;
@@ -93,10 +93,10 @@ t_bmp24 *bmp24_allocate(int width, int height, int colorDepth) {
 
 
 void bmp24_free(t_bmp24 *img) {
-    /* Libérer toute la mémoire allouée pour l’image img reçue en paramètre. */
+    /* Liberer toute la memoire allouee pour l’image img reçue en parametre. */
 
     if (img == NULL) {
-        return; // Rien à faire
+        return; // Rien a faire
     }
     if (img->data != NULL) {
         bmp24_freeDataPixels(img->data, img->height);
@@ -121,7 +121,7 @@ void file_rawWrite (uint32_t position, void * buffer, uint32_t size, size_t n, F
 
 
 void bmp24_readPixelValue(t_bmp24 * img,  int x, int y, FILE * file){
-    /* lire la valeur d’un pixel à une position donnée (x, y) dans le fichier file */
+    /* lire la valeur d’un pixel a une position donnee (x, y) dans le fichier file */
     if (!(img->height%4 == 0) || !(img->width%4 == 0)) {
         printf("Error : invalid image size (%d,%d)\n", img->height, img->width);
         return;
@@ -147,31 +147,31 @@ void bmp24_readPixelValue(t_bmp24 * img,  int x, int y, FILE * file){
 
 
 void bmp24_writePixelValue(t_bmp24 *img, int x, int y, FILE *file) {
-    /* écrit la valeur d’un pixel à une position donnée (x, y) dans le fichier file */
+    /* ecrit la valeur d’un pixel a une position donnee (x, y) dans le fichier file */
     uint32_t offset  = img->header.offset;
     uint32_t rowsize = img->width*3;
     uint32_t fileY = (uint32_t)img->height - 1 - (uint32_t) y;
     uint32_t position = offset + fileY * rowsize + (uint32_t)x * 3;
 
-    // Préparer les 3 octets en ordre B, G, R
+    // Preparer les 3 octets en ordre B, G, R
     unsigned char bgr[3] = { img->data[y][x].blue, img->data[y][x].green, img->data[y][x].red };
-    // Écrire ces 3 octets
+    // ecrire ces 3 octets
     file_rawWrite(position, bgr, 1, 3, file); }
 
 
 
 
 void bmp24_readPixelData(t_bmp24 *img, FILE *file) {
-    /* lit toutes les données de l’image dans le fichier file */
+    /* lit toutes les donnees de l’image dans le fichier file */
     for (int y = 0; y < img->height; y++)
         for (int x = 0; x < img->width; x++)
             bmp24_readPixelValue(img, x, y, file);
 }
-//@brief Écrit la valeur du pixel (x,y) depuis image->data[y][x] dans le fichier BMP.
+//@brief ecrit la valeur du pixel (x,y) depuis image->data[y][x] dans le fichier BMP.
 
 
 void bmp24_writePixelData(t_bmp24 *image, FILE *file) {
-    /* écrit toutes les données de l’image dans le fichier file */
+    /* ecrit toutes les donnees de l’image dans le fichier file */
     for (int y = 0; y < image->height; y++) {
         for (int x = 0; x < image->width; x++) {
             bmp24_writePixelValue(image, x, y, file);
@@ -212,14 +212,14 @@ t_bmp24 *bmp24_loadImage(const char *filename) {
 
     img->data = bmp24_allocateDataPixels(img->width, img->height);
     if (img->data == NULL) {
-        printf("Erreur : données de l'image erronnée\n");
+        printf("Erreur : donnees de l'image erronnee\n");
         bmp24_free(img);
         fclose(fichier);
         return NULL;
     }
 
     bmp24_readPixelData(img, fichier);
-    printf("Image chargée avec succès !\n");
+    printf("Image chargee avec succes !\n");
     fclose(fichier);
     return img;
 }
@@ -231,10 +231,10 @@ t_bmp24 *bmp24_loadImage(const char *filename) {
 void bmp24_saveImage(t_bmp24 *img, const char *filename) {
     /* sauvegarde une image de type t_bmp24 dans un fichier au format BMP 24 bits */
 
-    //Ouverture du fichier et vérification erreur
+    //Ouverture du fichier et verification erreur
     FILE *fichier = fopen(filename, "wb");
     if (fichier == NULL) {
-        perror("Erreur lors de l'ouverture du fichier en écriture");
+        perror("Erreur lors de l'ouverture du fichier en ecriture");
         return;
     }
 
@@ -246,7 +246,7 @@ void bmp24_saveImage(t_bmp24 *img, const char *filename) {
 
     file_rawWrite(14, &img->header_info, sizeof(t_bmp_info), 1, fichier);
     bmp24_writePixelData(img, fichier);
-    printf("Image sauvegardée avec succès !\n");
+    printf("Image sauvegardee avec succes !\n");
     fclose(fichier);
 }
 
@@ -255,7 +255,7 @@ void bmp24_saveImage(t_bmp24 *img, const char *filename) {
 
 
 void bmp24_negative(t_bmp24 *img) {
-    /* Inverser les couleurs de l’image : pour chaque pixel, soustraire la valeur de chaque canal de couleur à 255. */
+    /* Inverser les couleurs de l’image : pour chaque pixel, soustraire la valeur de chaque canal de couleur a 255. */
     int width = img->width;
     int height = img->height;
 
@@ -269,7 +269,7 @@ void bmp24_negative(t_bmp24 *img) {
 }
 
 void bmp24_grayscale(t_bmp24 * img) {
-    /* Convertir l’image en niveaux de gris : pour chaque pixel, calculer la valeur moyenne des 3 canaux de couleur et affecter cette valeur à chaque canal */
+    /* Convertir l’image en niveaux de gris : pour chaque pixel, calculer la valeur moyenne des 3 canaux de couleur et affecter cette valeur a chaque canal */
     int width = img->width;
     int height = img->height;
     int moyenne;
@@ -284,12 +284,12 @@ void bmp24_grayscale(t_bmp24 * img) {
 }
 
 void bmp24_brightness(t_bmp24 * img, int value) {
-    /* Ajuster la luminosité de l’image : pour chaque pixel, ajouter une valeur value à chaque canal de couleur. */
+    /* Ajuster la luminosite de l’image : pour chaque pixel, ajouter une valeur value a chaque canal de couleur. */
     int width = img->width;
     int height = img->height;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            // On s'assure que la valeur ne dépasse pas 255
+            // On s'assure que la valeur ne depasse pas 255
             if (img->data[y][x].red+value<=255)
                 img->data[y][x].red+=value;
             else
@@ -322,7 +322,7 @@ t_pixel bmp24_convolution(t_bmp24 *img, int x, int y, float **kernel, int kernel
             int px = x + kx;
             int py = y + ky;
 
-            // Vérifier que les indices sont dans les bornes de l'image
+            // Verifier que les indices sont dans les bornes de l'image
             if (px >= 0 && px < img->width && py >= 0 && py < img->height) {
                 t_pixel p = img->data[py][px];
                 float coeff = kernel[ky + offset][kx + offset];
@@ -404,20 +404,20 @@ void bmp24_applyFilter(t_bmp24 *image, float **kernel, int kernelSize) {
 
 
 void bmp24_computeHistograms(t_bmp24 *img, unsigned int *histR, unsigned int *histG, unsigned int *histB) {
-    /* renvoie un tableau d’entiers contenant l’histogramme cumulé puis normalisé hist_eq. */
+    /* renvoie un tableau d’entiers contenant l’histogramme cumule puis normalise hist_eq. */
     if (img == NULL || histR == NULL || histG == NULL || histB == NULL) {
-        printf("Erreur : paramètres invalides pour le calcul d'histogrammes 24 bits.\n");
+        printf("Erreur : parametres invalides pour le calcul d'histogrammes 24 bits.\n");
         return;
     }
 
-    //initialiser histogrammes à zéro
+    //initialiser histogrammes a zero
     for (int i = 0; i < 256; i++) {
         histR[i] = 0;
         histG[i] = 0;
         histB[i] = 0;
     }
 
-    //parcourir chaque pixel + incrémenter histogrammes
+    //parcourir chaque pixel + incrementer histogrammes
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
             histR[img->data[y][x].red]++;
@@ -434,13 +434,13 @@ void bmp24_computeHistograms(t_bmp24 *img, unsigned int *histR, unsigned int *hi
 unsigned int * bmp24_computeCDF(unsigned int * hist) {
     /* renvoie un tableau d’entiers contenant l’histogramme */
     if (hist == NULL) {
-        printf("Erreur : histogramme erroné.\n");
+        printf("Erreur : histogramme errone.\n");
         return NULL;
     }
 
     unsigned int *cdf = calloc(256, sizeof(unsigned int)); //initialiser avec 0
     if (cdf == NULL) {
-        printf("Erreur : échec d'allocation mémoire pour la CDF.\n");
+        printf("Erreur : echec d'allocation memoire pour la CDF.\n");
         return NULL;
     }
 
@@ -456,9 +456,9 @@ unsigned int * bmp24_computeCDF(unsigned int * hist) {
 
 
 void bmp24_equalize(t_bmp24 * img) {
-    /* effectue l’égalisation d’histogramme sur une image couleur 24-bits */
+    /* effectue l’egalisation d’histogramme sur une image couleur 24-bits */
     if (img == NULL) {
-        printf("Erreur : image erronée.\n");
+        printf("Erreur : image erronee.\n");
         return;
     }
 
@@ -467,7 +467,7 @@ void bmp24_equalize(t_bmp24 * img) {
     unsigned int *histG = calloc(256, sizeof(unsigned int));
     unsigned int *histB = calloc(256, sizeof(unsigned int));
     if (histR == NULL || histG == NULL || histB == NULL) {
-        printf("Erreur : échec d'allocation mémoire.\n");
+        printf("Erreur : echec d'allocation memoire.\n");
         free(histR); free(histG); free(histB);
         return;
     }
@@ -485,7 +485,7 @@ void bmp24_equalize(t_bmp24 * img) {
     unsigned int *cdfG = calloc(256, sizeof(unsigned int));
     unsigned int *cdfB = calloc(256, sizeof(unsigned int));
     if (cdfR == NULL || cdfG == NULL || cdfB == NULL) {
-        printf("Erreur : échec d'allocation.\n");
+        printf("Erreur : echec d'allocation.\n");
         free(histR); free(histG); free(histB);
         free(cdfR); free(cdfG); free(cdfB);
         return;
@@ -510,7 +510,7 @@ void bmp24_equalize(t_bmp24 * img) {
 
     unsigned int totalPixels = img->width * img->height;
 
-    // Calculer les LUT (tableaux de correspondance égalisée)
+    // Calculer les LUT (tableaux de correspondance egalisee)
     unsigned char lutR[256], lutG[256], lutB[256];
     for (int i = 0; i < 256; i++) {
         lutR[i] = (unsigned char)(((float)(cdfR[i] - cdf_minR) / (totalPixels - cdf_minR)) * 255.0 + 0.5);
@@ -527,7 +527,7 @@ void bmp24_equalize(t_bmp24 * img) {
         }
     }
 
-    // Libérer la mémoire
+    // Liberer la memoire
     free(histR); free(histG); free(histB);
     free(cdfR); free(cdfG); free(cdfB);
 }

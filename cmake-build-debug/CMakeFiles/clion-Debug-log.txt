@@ -1,4 +1,4 @@
-C:\Users\tsunt\AppData\Local\JetBrains\CLion2024.3\cygwin_cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /cygdrive/c/Users/tsunt/Desktop/image_processing -B /cygdrive/c/Users/tsunt/Desktop/image_processing/cmake-build-debug
+C:\Users\tsunt\AppData\Local\JetBrains\CLion2024.3\cygwin_cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_C_FLAGS=-Wall -Wextra -Wfatal-errors" -G "Unix Makefiles" -S /cygdrive/c/Users/tsunt/Desktop/image_processing -B /cygdrive/c/Users/tsunt/Desktop/image_processing/cmake-build-debug
 CMake Error: CMake was unable to find a build program corresponding to "Unix Makefiles".  CMAKE_MAKE_PROGRAM is not set.  You probably need to select a different build tool.
 CMake Error: CMAKE_C_COMPILER not set, after EnableLanguage
 -- Configuring incomplete, errors occurred!

@@ -9,10 +9,10 @@
 
 
 float **Allocate_Kernel();
-/* allocation mémoire pour tableau kernel */
+/* allocation memoire pour tableau kernel */
 
 void freeKernel(float **kernel, int size);
-/* libère mémoire allouée pour kernel */
+/* libere memoire allouee pour kernel */
 
 void bmp24_printInfo(t_bmp24 *image);
 /* affiche les informations sur le fichier */

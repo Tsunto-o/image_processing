@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/_intsup.h>
 
 #include "bmp24.c"
 #include "bmp8.c"
